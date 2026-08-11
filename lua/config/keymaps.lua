@@ -44,42 +44,93 @@ map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
 
 -- New maps here
 
--- C++ build / run
+-- ===== C++ build system =====
 local vsdevcmd = 'C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\Tools\\VsDevCmd.bat'
 
-local function find_sln()
-  local found = vim.fs.find(function(name)
-    return name:match("%.sln$") or name:match("%.vcxproj$")
-  end, {
-    upward = true,
-    path = vim.fn.expand("%:p:h"),
-    type = "file",
-  })
-  return found[1]
-end
-
-local function vs_term(action)
-  local sln = find_sln()
-  if not sln then
-    vim.notify("No .sln or .vcxproj found above this file", vim.log.levels.ERROR)
-    return
-  end
-  local dir = vim.fn.fnamemodify(sln, ":h")
-  local name = vim.fn.fnamemodify(sln, ":t:r")
-
-  local cmd = 'msbuild "' .. sln .. '" /p:Configuration=Debug /p:Platform=x64'
-  if action == "run" then
-    cmd = cmd .. ' && "' .. dir .. '\\x64\\Debug\\' .. name .. '.exe"'
-  end
-
+local function vs_term(dir, command)
   local Terminal = require("toggleterm.terminal").Terminal
   Terminal:new({
-    cmd = 'cmd.exe /k ""' .. vsdevcmd .. '" -arch=x64 && cd /d "' .. dir .. '" && ' .. cmd .. '"',
+    cmd = 'cmd.exe /k ""' .. vsdevcmd .. '" -arch=x64 && cd /d "' .. dir .. '" && ' .. command .. '"',
     direction = "float",
     float_opts = { border = "rounded" },
     close_on_exit = false,
   }):toggle()
 end
 
-map("n", "<leader>mb", function() vs_term("build") end, { desc = "Build C++ project" })
-map("n", "<leader>mr", function() vs_term("run") end, { desc = "Build and run C++" })
+-- Walk up from the current file looking for CMakeLists.txt first, then .sln
+local function find_project()
+  local found = vim.fs.find({ "CMakeLists.txt" }, {
+    upward = true,
+    path = vim.fn.expand("%:p:h"),
+    type = "file",
+  })
+  if found[1] then
+    return "cmake", vim.fn.fnamemodify(found[1], ":h"), found[1]
+  end
+
+  found = vim.fs.find(function(name)
+    return name:match("%.slnx?$")
+  end, {
+    upward = true,
+    path = vim.fn.expand("%:p:h"),
+    type = "file",
+  })
+  if found[1] then
+    return "msvc", vim.fn.fnamemodify(found[1], ":h"), found[1]
+  end
+
+  return nil
+end
+
+local function cpp_action(run)
+  local kind, dir, file = find_project()
+  if not kind then
+    vim.notify("No CMakeLists.txt or .sln found", vim.log.levels.ERROR)
+    return
+  end
+
+  local cmd
+  if kind == "cmake" then
+    cmd = "cmake -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build build"
+    if run then
+      cmd = cmd .. " && build\\" .. vim.fn.fnamemodify(dir, ":t") .. ".exe"
+    end
+  else
+    cmd = 'msbuild "' .. file .. '" /p:Configuration=Debug /p:Platform=x64'
+    if run then
+      cmd = cmd .. " && x64\\Debug\\" .. vim.fn.fnamemodify(file, ":t:r") .. ".exe"
+    end
+  end
+
+  vs_term(dir, cmd)
+end
+
+map("n", "<leader>mb", function() cpp_action(false) end, { desc = "Build C++ project" })
+map("n", "<leader>mr", function() cpp_action(true) end, { desc = "Build and run C++" })
+
+-- New CMake project from template
+map("n", "<leader>mn", function()
+  local name = vim.fn.input("New C++ project name: ")
+  if name == "" then return end
+
+  local src = "C:\\Users\\bacsa\\Workspace\\repos\\cpp\\templates\\cpp-cmake"
+  local dst = "C:\\Users\\bacsa\\Workspace\\repos\\cpp\\cmake\\" .. name
+
+  if vim.fn.isdirectory(dst) == 1 then
+    vim.notify("Project already exists", vim.log.levels.ERROR)
+    return
+  end
+
+  vim.fn.system('xcopy /E /I /Q "' .. src .. '" "' .. dst .. '"')
+  vim.fn.system('rmdir /s /q "' .. dst .. '\\build" 2>nul')
+  local cml = dst .. "\\CMakeLists.txt"
+  local lines = vim.fn.readfile(cml)
+  for i, line in ipairs(lines) do
+    lines[i] = line:gsub("ProjectName", name)
+  end
+  vim.fn.writefile(lines, cml)
+
+  vim.cmd("cd " .. vim.fn.fnameescape(dst))
+  vim.cmd("edit " .. vim.fn.fnameescape(dst .. "\\src\\main.cpp"))
+  vim.notify("Created " .. name)
+end, { desc = "New C++ project" })
