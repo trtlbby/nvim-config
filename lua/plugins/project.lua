@@ -1,23 +1,26 @@
 return {
   {
-    "ahmedkhalf/project.nvim",
-    main = "project_nvim",
+    "coffebar/neovim-project",
     event = "VeryLazy",
-    config = function()
-      require("project_nvim").setup({
-        detection_methods = { "pattern" },
-        patterns = { ".git", "package.json", "compile_flags.txt", "pyproject.toml", "*.sln" },
-      })
-      require("telescope").load_extension("projects")
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim",
+      "Shatur/neovim-session-manager",
+    },
+    opts = {
+      projects = {
+        "E:/800 Workspace/*",
+        "C:/Users/bacsa/Workspace/*",
+        "C:/Users/bacsa/AppData/Local/nvim"
+      },
+      picker = { type = "telescope" },
+    },
+    init = function()
+      vim.opt.sessionoptions:append("globals")
     end,
-  },
-  {
-    "folke/persistence.nvim",
-    event = "BufReadPre",
-    opts = {},
     keys = {
-      { "<leader>qs", function() require("persistence").load() end, desc = "Restore session" },
-      { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore last session" },
+      { "<leader>fp", ":NeovimProjectDiscover<CR>", desc = "Find project" },
+      { "<leader>fP", ":NeovimProjectHistory<CR>", desc = "Recent projects" },
     },
   },
 }
