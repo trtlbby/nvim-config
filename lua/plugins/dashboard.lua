@@ -16,7 +16,7 @@ return {
     dashboard.section.buttons.val = {
       dashboard.button("e", "  New file", ":ene <CR>"),
       dashboard.button("p", "  Find project", ":NeovimProjectDiscover<CR>"),
-      dashboard.button("p", "  Recent Projects", ":NeovimProjectHistory<CR>"),
+      dashboard.button("P", "  Recent Projects", ":NeovimProjectHistory<CR>"),
       dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
       dashboard.button("r", "  Recent files", ":Telescope oldfiles <CR>"),
       dashboard.button("q", "  Quit", ":qa<CR>"),
