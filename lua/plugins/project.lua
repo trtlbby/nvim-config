@@ -2,6 +2,7 @@ return {
   {
     "ahmedkhalf/project.nvim",
     main = "project_nvim",
+    event = "VeryLazy",
     config = function()
       require("project_nvim").setup({
         detection_methods = { "pattern" },

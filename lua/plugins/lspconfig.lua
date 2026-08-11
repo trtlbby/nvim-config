@@ -1,5 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
+  event = { "BufReadPre", "BufNewFile" },
   config = function()
     local servers = {
       "html", "cssls", "ts_ls", "tailwindcss", "emmet_ls",

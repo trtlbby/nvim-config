@@ -2,7 +2,7 @@ return {
   "nvim-tree/nvim-tree.lua",
   dependencies = { "nvim-tree/nvim-web-devicons" },
   keys = {
-    { "<leader>t", ":NvimTreeToggle<CR>", desc = "Toggle file tree" },
+    { "<leader>tt", ":NvimTreeToggle<CR>", desc = "Toggle file tree" },
     { "<leader>tf", ":NvimTreeFindFile<CR>", desc = "Find current file in tree" },
   },
   opts = {
