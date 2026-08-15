@@ -8,6 +8,11 @@ map("n", "<C-l>", "<C-w>l", { desc = "Window right" })
 
 -- Clear search highlight
 map("n", "<Esc>", ":nohlsearch<CR>", { silent = true })
+-- redo
+map("n", "<C-r>", ":redo<CR>", { desc = "Redo" })
+-- Delete word backward (insert mode)
+map("i", "<C-BS>", "<C-w>", { desc = "Delete word backward" })
+map("i", "<C-h>", "<C-w>", { desc = "Delete word backward" })
 
 -- Move lines up/down in visual mode
 map("v", "J", ":m '>+1<CR>gv=gv")
