@@ -40,6 +40,9 @@ map("i", "kj", "<Esc>", { desc = "Normal Mode" })
 map("n", "<Tab>", ":BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<S-Tab>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 map("n", "<leader>bd", ":bdelete<CR>", { desc = "Close buffer" })
+-- Split Command
+map("n", "<leader>nv", ":vsplit<CR>", { desc = "Split Right Vertically" })
+map("n", "<leader>nh", ":split<CR>", { desc = "Split Horizontally" })
 
 -- Resize Window
 map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
