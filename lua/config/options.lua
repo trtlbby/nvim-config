@@ -16,6 +16,8 @@ vim.opt.splitbelow = true
 vim.opt.undofile = true
 vim.opt.fillchars = { eob = " " }
 vim.o.winborder = "rounded"
+vim.opt.wrap = true
+vim.opt.linebreak = true
 vim.diagnostic.config({
   virtual_text = { prefix = "●" },
   signs = {
@@ -35,4 +37,12 @@ if vim.g.neovide then
   vim.g.neovide_window_blurred = true
   vim.g.neovide_cursor_vfx_mode = "railgun"
   vim.g.neovide_background_image_path = "E:\\Portables\\galaxy.jpg"
+
+  vim.g.neovide_scale_factor = 1.0
+  local function change_scale(delta)
+    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
+  end
+  vim.keymap.set({ "n", "v" }, "<C-=>", function() change_scale(1.1) end, { desc = "Zoom in" })
+  vim.keymap.set({ "n", "v" }, "<C-->", function() change_scale(1 / 1.1) end, { desc = "Zoom out" })
+  vim.keymap.set({ "n", "v" }, "<C-0>", function() vim.g.neovide_scale_factor = 1.0 end, { desc = "Reset zoom" })
 end
